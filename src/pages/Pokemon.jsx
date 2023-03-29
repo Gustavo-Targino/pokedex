@@ -1,0 +1,129 @@
+import * as React from 'react';
+import Card from '@mui/material/Card';
+
+import CardContent from '@mui/material/CardContent';
+import CardMedia from '@mui/material/CardMedia';
+import LinearProgress from '@mui/material/LinearProgress';
+import Typography from '@mui/material/Typography';
+import { Grid } from '@mui/material';
+
+import { useState, useEffect } from 'react';
+
+import { useParams } from 'react-router-dom';
+import axios from 'axios';
+
+import Loading from '../components/Loading/Loading';
+
+export default function Pokemon() {
+
+
+    const changeColor = (principal) => {
+        let color = ''
+          if(principal === "water") {
+              return color = "rgb(25, 167, 206, 0.7)"
+          }
+          if(principal === "grass" || principal === "bug") {
+              return color = "rgb(95, 141, 78, 0.8)"
+          }
+          if(principal === "fire") {
+              return color = "rgb(255, 3, 3, 0.7)"
+          }
+          if(principal ===  "electric") {
+              return color = "rgb(247, 192, 74, 0.8)"
+          }
+          if(principal === "ground") {
+              return color = "rgb(60, 42, 33,0.7)"
+          }
+          if(principal === "poison") {
+              return color = "rgb(113, 73, 198, 0.7)"
+          }
+          if(principal==="normal") {
+              return color = "rgb(216, 216, 216, 0.7)"
+          }
+      }
+
+    let {name} = useParams()
+
+    const [especific, setEspecific] = useState()
+
+    useEffect(() => {
+        getEspecific()
+    }, [])
+
+    const getEspecific = async () => {
+        const res = await axios.get(`https://pokeapi.co/api/v2/pokemon/${name}`)
+        const data = res.data
+        setEspecific(data)
+        
+    }
+
+    const typeHandler = (types) => {
+        if(types[1]) {
+            let type0 = types[0].type.name
+            let type0F = type0.charAt(0).toUpperCase() + type0.slice(1)
+
+            let type1 = types[1].type.name
+            let type1F = type1.charAt(0).toUpperCase() + type1.slice(1)
+
+            return type0F + " | " + type1F
+        }
+        return types[0].type.name.charAt(0).toUpperCase() + types[0].type.name.slice(1)
+    }
+
+  return (
+    <>
+
+    {typeof(especific)!=='undefined' ?
+        
+        <Grid container  justifyContent="center" alignItems="center" style={{minHeight: '100vh', backgroundColor: changeColor(especific.types[0].type.name)}}>
+            
+                <Card sx={{ minWidth: 500, m: 5 }} variant="outlined">
+                <CardMedia
+                sx={{  height: 500 }}
+                image={especific.sprites.front_default}
+                title={especific.name}
+                />
+                <CardContent>
+                <Typography gutterBottom variant="h5" component="div" sx={{fontWeight:900}}>
+                    {especific.name.charAt(0).toUpperCase() + especific.name.slice(1)}
+                </Typography>
+
+                <Typography variant="body1" color="text.secondary">
+                    {typeHandler(especific.types)}
+                </Typography>
+
+                <Typography variant="body1" color="text.secondary">
+                    Weight: {especific.weight}
+                </Typography>
+
+                <Typography variant="body1" color="text.secondary">
+                    Height: {especific.height}
+                </Typography>
+
+                {especific.stats.map((item, index)=> (
+                    <Typography variant="body1" color="text.secondary" key={index}>                            
+                            {item.stat.name.charAt(0).toUpperCase() + item.stat.name.slice(1)}
+                            <LinearProgress variant="determinate" color='primary' value={item.base_stat} sx={{}} />
+                     </Typography>
+
+                ))}
+                
+            
+
+                </CardContent>
+            </Card>
+        </Grid>
+
+        :
+
+            (<Grid container justifyContent="center" alignItems="center" style={{minHeight: '100vh'}}><Loading/></Grid> )
+    } 
+
+    </>
+
+   
+  )
+
+
+  
+}
